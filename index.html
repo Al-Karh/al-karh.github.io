@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Al Karh| عالم المانغا</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://files.catbox.moe" crossorigin/>
+  <link rel="dns-prefetch" href="https://files.catbox.moe"/>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet"/>
 <style>
 :root{
@@ -145,9 +147,28 @@ body.adm .cac{display:flex}
 .pwe{position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:4px}
 .lerr{background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.3);border-radius:8px;padding:9px 13px;color:var(--a2);font-size:.86rem;margin-bottom:12px;display:none}
 
+
+/* Cover lightbox */
+.clb{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;padding:16px}
+.clb.open{opacity:1;pointer-events:all}
+.clb img{max-width:100%;max-height:90vh;object-fit:contain;
+  border-radius:10px;box-shadow:0 0 40px rgba(0,0,0,.8);
+  transform:scale(.93);transition:transform .25s}
+.clb.open img{transform:scale(1)}
+.clb-close{position:absolute;top:16px;right:16px;
+  background:rgba(255,255,255,.12);border:none;color:#fff;
+  width:38px;height:38px;border-radius:50%;font-size:1.1rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .2s}
+.clb-close:hover{background:var(--accent)}
+.dcov{cursor:zoom-in}
+
 /* Detail modal */
 #detailMd .md{max-width:640px}
-.dcov{width:100%;aspect-ratio:16/7;object-fit:cover;border-radius:11px;margin-bottom:16px}
+#detailMd .mh{justify-content:flex-start}
+.dcov{display:block;margin:0 auto 16px;max-height:280px;width:auto;max-width:100%;object-fit:contain;border-radius:11px}
 .dtitle{font-size:1.35rem;font-weight:900;margin-bottom:7px}
 .dtags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
 .dtag{background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.28);color:var(--a2);padding:3px 12px;border-radius:20px;font-size:.8rem}
@@ -269,10 +290,11 @@ footer p{font-size:.8rem}
   position:fixed;top:0;left:0;right:0;z-index:510;
   background:linear-gradient(to bottom,rgba(0,0,0,.95),transparent);
   padding:10px 16px 28px;
-  display:flex;align-items:center;gap:10px;
+  display:none;align-items:center;gap:10px;
   transition:opacity .4s,transform .4s;
 }
-.rbar.hidden{opacity:0;transform:translateY(-100%)}
+#reader.open .rbar{display:flex;}
+.rbar.hidden{opacity:0;transform:translateY(-100%);pointer-events:none;}
 .rbk{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;
   width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.1rem;
   display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
@@ -291,10 +313,11 @@ footer p{font-size:.8rem}
   position:fixed;bottom:0;left:0;right:0;z-index:510;
   background:linear-gradient(to top,rgba(0,0,0,.95),transparent);
   padding:28px 16px 12px;
-  display:flex;align-items:center;justify-content:center;gap:12px;
+  display:none;align-items:center;justify-content:center;gap:12px;
   transition:opacity .4s,transform .4s;
 }
-.rbot.hidden{opacity:0;transform:translateY(100%)}
+#reader.open .rbot{display:flex;}
+.rbot.hidden{opacity:0;transform:translateY(100%);pointer-events:none;}
 .rpg{font-size:.85rem;color:rgba(255,255,255,.7);font-weight:600;min-width:60px;text-align:center}
 .rnav{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;
   width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:1.1rem;
@@ -352,13 +375,6 @@ footer p{font-size:.8rem}
 .rtap.left{left:0}
 .rtap.right{right:0}
 
-/* Page loading spinner */
-.rpg-spin{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:36px;height:36px;border:3px solid rgba(255,255,255,.1);
-  border-top-color:var(--accent);border-radius:50%;
-  animation:sp .8s linear infinite;
-}
 
 /* Empty reader */
 .rempty{
@@ -556,7 +572,6 @@ footer p{font-size:.8rem}
 <div class="bd" id="detailMd" onclick="bgc(event,'detailMd')">
   <div class="md">
     <div class="mh">
-      <h3 id="dmTitle">تفاصيل المانغا</h3>
       <button class="mcl" onclick="closeM('detailMd')">✕</button>
     </div>
     <img class="dcov" id="dCov" src="" alt=""/>
@@ -660,7 +675,6 @@ footer p{font-size:.8rem}
 
   <!-- Single page mode -->
   <div class="rsingle" id="rsingle">
-    <div class="rpg-spin" id="rSpinner"></div>
     <img id="rImg" src="" alt="" draggable="false"/>
     <div class="rtap left"  onclick="prevPage()"></div>
     <div class="rtap right" onclick="nextPage()"></div>
@@ -730,7 +744,7 @@ function render(list){
         <button class="cab dl" onclick="delMPr('${m.id}',event)">🗑️</button>
       </div>
       <div class="iw">
-        <img src="${m.cover||'https://placehold.co/300x420/0d0d1e/e63946?text=MANGA'}" alt="${m.title}" loading="lazy" onerror="this.src='https://placehold.co/300x420/0d0d1e/e63946?text=MANGA'"/>
+        <img src="${m.cover||'https://placehold.co/300x420/0d0d1e/e63946?text=MANGA'}" alt="${m.title}" loading="lazy" decoding="async" onerror="this.src='https://placehold.co/300x420/0d0d1e/e63946?text=MANGA'"/>
         <div class="bdgs">${bh}</div>
         ${m.rating?`<div class="rat">⭐ ${(+m.rating).toFixed(1)}</div>`:''}
       </div>
@@ -770,8 +784,10 @@ window.delMPr=(mid,e)=>{e&&e.stopPropagation();delTgt={t:'manga',mid};const m=al
 window.openDet=mid=>{
   const m=all.find(x=>x.id===mid);if(!m)return;
   curMid=mid;editCid=null;
-  document.getElementById('dmTitle').textContent=m.title||'';
-  document.getElementById('dCov').src=m.cover||'https://placehold.co/700x220/0d0d1e/e63946?text=MANGA';
+  const covEl=document.getElementById('dCov');
+  covEl.src=m.cover||'https://placehold.co/700x220/0d0d1e/e63946?text=MANGA';
+  covEl.onclick=m.cover?()=>openCovLb(m.cover):null;
+  covEl.style.cursor=m.cover?'zoom-in':'';
   document.getElementById('dTit').textContent=m.title||'';
   document.getElementById('dDesc').textContent=m.desc||'لا يوجد وصف.';
   const ga=GL[m.genre]||m.genre||'';
@@ -873,6 +889,9 @@ window.openReader=async(mid,cid,e)=>{
 window.closeReader=()=>{
   document.getElementById('reader').classList.remove('open');
   document.body.style.overflow='';
+  // clean up observer and queue to free memory
+  if(_readerObserver){ _readerObserver.disconnect(); _readerObserver=null; }
+  _loadQueue=[]; _loadingCount=0;
   document.getElementById('rscroll').innerHTML='';
   document.getElementById('rImg').src='';
 };
@@ -893,27 +912,81 @@ window.toggleMode=()=>{
     loadSinglePage(window._rIdx);
   }
 };
+/* ══ Progressive Image Loader ══
+   Strategy:
+   1. Render all page-wraps with data-src (no src) → zero network requests upfront
+   2. IntersectionObserver triggers when a wrap enters viewport (rootMargin: 300px ahead)
+   3. A serial queue ensures images load ONE at a time (or up to MAX_CONCURRENT)
+      to avoid flooding the connection with 50+ simultaneous requests
+   4. Each image fades in smoothly on load — no layout shift
+═══════════════════════════════════════════════════════════════════════════════ */
+let _readerObserver = null;   // IntersectionObserver instance
+const MAX_CONCURRENT = 2;     // max parallel image downloads at any time
+let _loadingCount = 0;        // currently downloading
+let _loadQueue = [];          // pending {img, src} items
+
+function _flushQueue(){
+  while(_loadingCount < MAX_CONCURRENT && _loadQueue.length){
+    const {img, src} = _loadQueue.shift();
+    // skip if already loaded (observer may have fired twice)
+    if(img.src || img.dataset.loaded) continue;
+    _loadingCount++;
+    img.dataset.loaded = '1';
+    img.onload  = ()=>{ img.style.opacity=1; _loadingCount--; _flushQueue(); };
+    img.onerror = ()=>{ img.style.border='1px solid rgba(230,57,70,.3)';
+                        _loadingCount--; _flushQueue(); };
+    img.src = src;
+  }
+}
+
 function buildScrollReader(pages){
-  const wrap=document.getElementById('rscroll');
-  wrap.innerHTML=pages.map((url,i)=>`
+  // tear down previous observer
+  if(_readerObserver){ _readerObserver.disconnect(); _readerObserver=null; }
+  _loadQueue    = [];
+  _loadingCount = 0;
+
+  const wrap = document.getElementById('rscroll');
+
+  // Build DOM — images have NO src, only data-src
+  wrap.innerHTML = pages.map((url,i)=>`
     <div class="rpage-wrap" id="rpw${i}">
-      <img src="${url}" alt="صفحة ${i+1}" loading="lazy"
-           onerror="this.style.border='1px solid rgba(230,57,70,.3)'"
-           onload="this.style.opacity=1" style="opacity:0;transition:opacity .3s"
-           onload="this.style.opacity=1"/>
+      <img data-src="${url}" alt="صفحة ${i+1}"
+           decoding="async"
+           style="opacity:0;transition:opacity .35s;min-height:120px"/>
       <div class="pg-num">${i+1}</div>
     </div>`).join('');
-  // update page counter on scroll
-  wrap.onscroll=()=>{
-    const children=[...wrap.querySelectorAll('.rpage-wrap')];
-    let cur=0;
+
+  /* ── IntersectionObserver: preload ~1 screen ahead ── */
+  _readerObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      const img = entry.target.querySelector('img[data-src]');
+      if(!img || img.dataset.loaded) return;
+      _loadQueue.push({ img, src: img.dataset.src });
+      delete img.dataset.src;           // remove so observer ignores it again
+      _readerObserver.unobserve(entry.target);
+      _flushQueue();
+    });
+  },{
+    root: wrap,
+    rootMargin: '0px 0px 400px 0px',   // start loading 400px before entering view
+    threshold: 0
+  });
+
+  // Observe every page-wrap
+  wrap.querySelectorAll('.rpage-wrap').forEach(pw => _readerObserver.observe(pw));
+
+  /* ── Page counter on scroll ── */
+  wrap.onscroll = ()=>{
+    const children = [...wrap.querySelectorAll('.rpage-wrap')];
+    let cur = 0;
     for(let i=0;i<children.length;i++){
-      const r=children[i].getBoundingClientRect();
-      if(r.top<window.innerHeight*.6){cur=i;}
+      const r = children[i].getBoundingClientRect();
+      if(r.top < window.innerHeight*.6){ cur=i; }
     }
-    window._rIdx=cur;
-    document.getElementById('rSlider').value=cur+1;
-    updatePageLabel(cur+1,pages.length);
+    window._rIdx = cur;
+    document.getElementById('rSlider').value = cur+1;
+    updatePageLabel(cur+1, pages.length);
   };
 }
 function scrollToPage(idx){
@@ -921,16 +994,33 @@ function scrollToPage(idx){
   if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function loadSinglePage(idx){
-  const img=document.getElementById('rImg');
-  const sp=document.getElementById('rSpinner');
-  img.classList.add('fade');sp.style.display='block';
-  img.onload=()=>{img.classList.remove('fade');sp.style.display='none';};
-  img.onerror=()=>{sp.style.display='none';};
-  img.src=window._rPages[idx]||'';
-  updatePageLabel(idx+1,window._rPages.length);
-  document.getElementById('rSlider').value=idx+1;
-  document.getElementById('rPrevBtn').disabled=idx===0;
-  document.getElementById('rNextBtn').disabled=idx===window._rPages.length-1;
+  const img = document.getElementById('rImg');
+
+  // مسح الـ handlers القديمة لمنع التعارض عند التقليب السريع
+  img.onload  = null;
+  img.onerror = null;
+
+  img.classList.add('fade');
+
+  const done = ()=>{ img.classList.remove('fade'); };
+  const fail = ()=>{ img.classList.remove('fade'); };
+
+  img.onload  = done;
+  img.onerror = fail;
+  img.decoding = 'async';
+  img.src = window._rPages[idx] || '';
+
+  // لو الصورة محفوظة في cache → onload لا يُشغَّل → نتحقق يدوياً
+  if(img.complete && img.naturalWidth > 0){ done(); }
+
+  // تحميل مسبق للصفحة التالية في الخلفية
+  const nextSrc = window._rPages[idx + 1];
+  if(nextSrc){ const pre=new Image(); pre.decoding='async'; pre.src=nextSrc; }
+
+  updatePageLabel(idx+1, window._rPages.length);
+  document.getElementById('rSlider').value = idx+1;
+  document.getElementById('rPrevBtn').disabled = idx===0;
+  document.getElementById('rNextBtn').disabled = idx===window._rPages.length-1;
 }
 window.prevPage=()=>{
   if(window._rMode==='scroll'){scrollToPage(Math.max(0,window._rIdx-1));return;}
@@ -1019,6 +1109,16 @@ window.doLogin=function(){
     document.getElementById('pwIn').focus();
   }
 };
+
+window.openCovLb=function(src){
+  document.getElementById('lbImg').src=src;
+  document.getElementById('covLb').classList.add('open');
+};
+window.closeCovLb=function(e){
+  if(e.target===document.getElementById('covLb'))
+    document.getElementById('covLb').classList.remove('open');
+};
+
 window.adminOut=function(){sessionStorage.removeItem('adm');document.body.classList.remove('adm');toast('👋 تم الخروج','ok');};
 window.togglePw=function(){const f=document.getElementById('pwIn');f.type=f.type==='password'?'text':'password';};
 
@@ -1085,13 +1185,31 @@ function extractUrl(raw){
   if(hrefM)return hrefM[1].trim();
   try{new URL(raw);return raw;}catch{return null;}
 }
+function splitUrls(text){
+  // فصل الروابط المتلصقة مثل: https://a.jpghttps://b.jpg
+  var parts = text.split(/(?=https?:\/\/)/);
+  var urls = [];
+  parts.forEach(function(p){
+    p = p.trim();
+    if(!p) return;
+    // قد يكون فيه مسافات أو فواصل داخل الجزء
+    p.split(/[,\s]+/).forEach(function(s){
+      var u = extractUrl(s.trim());
+      if(u) urls.push(u);
+    });
+  });
+  return urls;
+}
+
+// يفصل الروابط المتلصقة مثل: https://a.com/1.jpghttps://b.com/2.png
 window.addPage=function(){
   const inp=document.getElementById('pgUrlIn');
-  const url=extractUrl(inp.value);
-  if(!url){toast('❌ لم يُعثر على رابط صحيح','err');return;}
-  window._pages.push(url);inp.value='';
+  const urls=splitUrls(inp.value);
+  if(!urls.length){toast('❌ لم يُعثر على رابط صحيح','err');return;}
+  window._pages.push(...urls);inp.value='';
   renderPgList();
   const l=document.getElementById('pgList');l.scrollTop=l.scrollHeight;
+  if(urls.length>1)toast(`✅ تمت إضافة ${urls.length} روابط`,'ok');
 };
 window.toggleBulk=function(){
   const w=document.getElementById('bulkWrap');
@@ -1099,7 +1217,7 @@ window.toggleBulk=function(){
 };
 window.bulkAdd=function(){
   const raw=document.getElementById('bulkArea').value;
-  const urls=raw.split('\n').map(l=>l.trim()).filter(Boolean).map(extractUrl).filter(Boolean);
+  const urls=splitUrls(raw);
   if(!urls.length)return toast('❌ لا توجد روابط صحيحة','err');
   window._pages.push(...urls);
   document.getElementById('bulkArea').value='';
@@ -1122,5 +1240,11 @@ window.renderPgList=function(){
     </div>`).join('');
 };
 </script>
+
+<!-- Cover Lightbox -->
+<div class="clb" id="covLb" onclick="closeCovLb(event)">
+  <button class="clb-close" onclick="document.getElementById('covLb').classList.remove('open')">✕</button>
+  <img id="lbImg" src="" alt=""/>
+</div>
 </body>
 </html>
