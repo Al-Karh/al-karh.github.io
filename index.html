@@ -1098,20 +1098,17 @@ window.nextChapter=async()=>{
 // Open reader
 window.openReader=async(mid,cid,e)=>{
   e&&e.stopPropagation();
-  // تشغيل الطلبَين بالتوازي بدلاً من التسلسل → يختصر الوقت للنصف
-  const needChsList=!window._curChs||window._curMidNav!==mid;
-  const [cSnap,chsSnap]=await Promise.all([
-    getDoc(cDoc(mid,cid)),
-    needChsList?getDocs(query(cCol(mid),orderBy('number','asc'))):Promise.resolve(null)
-  ]);
+  const cSnap=await getDoc(cDoc(mid,cid));
   if(!cSnap.exists())return;
   const c=cSnap.data();
   const m=all.find(x=>x.id===mid);
   const pages=c.pages||[];
   if(!pages.length)return toast('لا توجد صفحات في هذا الفصل بعد','err');
   window._rMid=mid; window._rCid=cid;
-  if(needChsList&&chsSnap){
-    window._curChs=chsSnap.docs.map(d=>({id:d.id,...d.data()}));
+  // جلب قائمة الفصول للتنقل إذا لم تكن محملة لهذه المانجا
+  if(!window._curChs||window._curMidNav!==mid){
+    const s=await getDocs(query(cCol(mid),orderBy('number','asc')));
+    window._curChs=s.docs.map(d=>({id:d.id,...d.data()}));
     window._curChsRaw=[...window._curChs];
     window._curMidNav=mid;
   }
@@ -1149,14 +1146,9 @@ window.closeReader=()=>{
 window.openReaderBySlug=async(mangaSlug,chNum)=>{
   const m=all.find(x=>slugify(x.title||'')===decodeURIComponent(mangaSlug));
   if(!m)return toast('المانجا غير موجودة','err');
-  // جلب الفصول مرة واحدة ثم تمريرها مباشرة لـ openReader (بدل جلبها مرتين)
-  const chsSnap=await getDocs(query(cCol(m.id),orderBy('number','asc')));
-  const chDoc=chsSnap.docs.find(d=>d.data().number===Number(chNum));
+  const chSnap=await getDocs(cCol(m.id));
+  const chDoc=chSnap.docs.find(d=>d.data().number===Number(chNum));
   if(!chDoc)return toast('الفصل غير موجود','err');
-  // حفظ قائمة الفصول مسبقاً حتى لا يعيد openReader جلبها
-  window._curChs=chsSnap.docs.map(d=>({id:d.id,...d.data()}));
-  window._curChsRaw=[...window._curChs];
-  window._curMidNav=m.id;
   await window.openReader(m.id,chDoc.id);
 };
 
